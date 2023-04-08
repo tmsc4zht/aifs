@@ -6,10 +6,13 @@ import (
 	"io"
 	"io/fs"
 	"path/filepath"
+	"strings"
 
 	"github.com/h2non/filetype"
 	"github.com/h2non/filetype/matchers"
 	"github.com/h2non/filetype/types"
+	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/transform"
 )
 
 type FS struct {
@@ -183,7 +186,20 @@ func zipNewReader(fsys fs.FS, name string) (fs.FS, error) {
 		return nil, fmt.Errorf("could not %s as io.ReaderAt", name)
 	}
 
-	return zip.NewReader(r, s.Size())
+	zr, err := zip.NewReader(r, s.Size())
+	if err != nil {
+		return nil, err
+	}
+
+	for _, zf := range zr.File {
+		if zf.NonUTF8 {
+			if newName, err := sjis2utf8(zf.Name); err == nil {
+				zf.Name = newName
+			}
+		}
+	}
+
+	return zr, err
 }
 
 func getIsDir(fsys fs.FS, name string) (bool, error) {
@@ -238,4 +254,12 @@ func sepFilePath(name string) []string {
 	}
 
 	return ret
+}
+
+func sjis2utf8(str string) (string, error) {
+	ret, err := io.ReadAll(transform.NewReader(strings.NewReader(str), japanese.ShiftJIS.NewDecoder()))
+	if err != nil {
+		return "", err
+	}
+	return string(ret), err
 }
