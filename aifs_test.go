@@ -122,6 +122,10 @@ func TestReadDir(t *testing.T) {
 			in: `にほんご.zip`,
 			ok: true,
 		},
+		{
+			in: `にほんご.zip/にほんご`,
+			ok: true,
+		},
 	}
 
 	for _, c := range cases {
