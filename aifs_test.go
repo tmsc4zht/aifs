@@ -60,12 +60,12 @@ func TestOpen(t *testing.T) {
 			f, err := aifs.Open(c.in)
 			if err != nil {
 				if c.ok {
-					t.Errorf("case: %v should be pass: %v", c.in, err)
+					t.Errorf("case: %v should pass: %v", c.in, err)
 				}
 			} else {
 				defer f.Close()
 				if !c.ok {
-					t.Errorf("case: %v should not be pass", c.in)
+					t.Errorf("case: %v should not pass", c.in)
 				}
 			}
 		}()
@@ -118,6 +118,14 @@ func TestReadDir(t *testing.T) {
 			in: `dirinzip.zip/z/cat1744.jpg`,
 			ok: false,
 		},
+		{
+			in: `にほんご.zip`,
+			ok: true,
+		},
+		{
+			in: `にほんご.zip/にほんご`,
+			ok: true,
+		},
 	}
 
 	for _, c := range cases {
@@ -125,11 +133,11 @@ func TestReadDir(t *testing.T) {
 			_, err := aifs.ReadDir(c.in)
 			if err != nil {
 				if c.ok {
-					t.Errorf("case: %v should be pass: %v", c.in, err)
+					t.Errorf("case: %v should pass: %v", c.in, err)
 				}
 			} else {
 				if !c.ok {
-					t.Errorf("case: %v should not be pass", c.in)
+					t.Errorf("case: %v should not pass", c.in)
 				}
 			}
 		}()
